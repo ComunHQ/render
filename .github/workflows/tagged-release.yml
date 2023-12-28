@@ -21,7 +21,7 @@
 
       - name: "Build"
         run: |
-          go build
+          GOOS=darwin GOARCH=amd64 go build -o bin/app-amd64-darwin main.go
 
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:

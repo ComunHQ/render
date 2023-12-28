@@ -1,17 +1,17 @@
 ---
-  name: "tagged-release"
-  
-  on:
-    push:
-      tags:
-        - "v*"
-  
-  jobs:
-    tagged-release:
-      name: "Tagged Release"
-      runs-on: "ubuntu-latest"
-  
-      steps:
+name: "tagged-release"
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  tagged-release:
+    name: "Tagged Release"
+    runs-on: "ubuntu-latest"
+
+    steps:
       - name: Setup actions
         uses: actions/checkout@v2
 

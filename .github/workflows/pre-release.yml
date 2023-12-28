@@ -22,6 +22,8 @@ jobs:
       - name: "Build"
         run: |
           GOOS=darwin GOARCH=amd64 go build -o bin/render-amd64-darwin main.go
+          GOOS=linux GOARCH=amd64 go build -o bin/render-amd64-linux main.go
+          GOOS=linux GOARCH=arm64 go build -o bin/render-arm64-linux main.go
 
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:

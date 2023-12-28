@@ -8,7 +8,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var configFile string
 var selection string
 
 var rootCmd = &cobra.Command{
@@ -21,6 +20,8 @@ var rootCmd = &cobra.Command{
 			os.Exit(0)
 		}
 
+		configFile := args[0]
+
 		configs := render.GetConfigs(configFile)
 		for name, config := range configs {
 			if selection == "" || selection == name {
@@ -31,7 +32,6 @@ var rootCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.Flags().StringVarP(&configFile, "config", "c", "", "config file")
 	rootCmd.Flags().StringVarP(&selection, "select", "s", "", "select a specific template to render")
 }
 

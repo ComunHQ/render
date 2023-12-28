@@ -16,6 +16,11 @@ var rootCmd = &cobra.Command{
 	Short: "render - a simple CLI to render a helm template and values into yaml",
 	Long:  `render - a simple CLI to render a helm template and values into yaml`,
 	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) == 0 {
+			cmd.Help()
+			os.Exit(0)
+		}
+
 		configs := render.GetConfigs(configFile)
 		for name, config := range configs {
 			if selection == "" || selection == name {

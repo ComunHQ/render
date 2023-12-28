@@ -12,6 +12,9 @@ jobs:
     runs-on: "ubuntu-latest"
 
     steps:
+      - name: Setup actions
+        uses: actions/checkout@v2
+
       - name: "Build"
         run: |
           go build

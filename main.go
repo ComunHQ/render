@@ -1,7 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"github.com/ComunHQ/render/cmd/render"
+)
 
 func main() {
-	fmt.Println("Hello, world!")
+	render.Execute()
 }

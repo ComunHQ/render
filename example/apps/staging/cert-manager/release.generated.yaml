@@ -23,7 +23,7 @@ metadata:
   name: cert-manager
   namespace: cert-manager
   annotations:
-    eks.amazonaws.com/role-arn: arn:aws:iam::XXX:role/cert-manager-role
+    eks.amazonaws.com/role-arn: arn:aws:iam::XXX:role/some-cert-manager-role
   labels:
     app: cert-manager
     app.kubernetes.io/name: cert-manager

@@ -3,10 +3,8 @@ cert-manager:
     artifactUrl: "https://charts.jetstack.io/charts/cert-manager-v1.11.0.tgz"
   renders:
     - workingDirectory: apps/staging/cert-manager
-      outputFile: release
       releaseName: cert-manager
       namespace: cert-manager
     - workingDirectory: apps/production/cert-manager
-      outputFile: release
       releaseName: cert-manager
       namespace: cert-manager

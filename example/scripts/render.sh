@@ -1,2 +1,3 @@
 #!/bin/bash
-go run ../main.go $*
+find . -name "*.generated.yaml" -type f -delete
+go run ../main.go render.yaml

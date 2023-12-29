@@ -111,6 +111,11 @@ func Render(conf render, base renderBase) {
 		helmChart = chart
 	}
 
+	var outputFilename = conf.OutputFile
+	if outputFilename == "" {
+		outputFilename = "release"
+	}
+
 	valuesFile := ValuesFile(conf.WorkingDirectory)
 
 	var command = fmt.Sprintf("helm template %s", helmChart)
@@ -126,12 +131,9 @@ func Render(conf render, base renderBase) {
 	}
 	slog.Debug("Running command: " + command)
 	var pipe = script.Exec(command).WithStderr(os.Stderr)
-	if conf.OutputFile != "" {
-		var outputFile = path.Join(conf.WorkingDirectory, conf.OutputFile+".generated.yaml")
-		pipe.WriteFile(outputFile)
-	} else {
-		pipe.Stdout()
-	}
+
+	var outputFile = path.Join(conf.WorkingDirectory, outputFilename+".generated.yaml")
+	pipe.WriteFile(outputFile)
 }
 
 func Run(conf renderConf) {

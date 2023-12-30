@@ -23,6 +23,7 @@ type renderConf struct {
 type renderBase struct {
 	RemoteArtifact remoteArtifact `yaml:"remoteArtifact"`
 	LocalChart     localChart     `yaml:"localChart"`
+	RemoteChart    remoteChart    `yaml:"remoteChart"`
 	IncludeCrds    bool           `yaml:"includeCrds"`
 }
 
@@ -30,6 +31,7 @@ type render struct {
 	WorkingDirectory       string         `yaml:"workingDirectory"`
 	RemoteArtifactOverride remoteArtifact `yaml:"remoteArtifact"`
 	LocalChartOverride     localChart     `yaml:"localChart"`
+	RemoteChartOverride    remoteChart    `yaml:"remoteChart"`
 	OutputFile             string         `yaml:"outputFile"`
 	ReleaseName            string         `yaml:"releaseName"`
 	Namespace              string         `yaml:"namespace"`
@@ -42,6 +44,11 @@ type remoteArtifact struct {
 
 type localChart struct {
 	Directory string `yaml:"directory"`
+}
+
+type remoteChart struct {
+	Chart   string `yaml:"chart"`
+	Version string `yaml:"version"`
 }
 
 func GetRemoteArtifact(artifactUrl string, artifactModificationCommand string) string {
@@ -107,15 +114,31 @@ func Render(conf render, base renderBase) {
 		artifactModificationCommand = conf.RemoteArtifactOverride.ModificationCommand
 	}
 
-	var chart = base.LocalChart.Directory
+	var localChart = base.LocalChart.Directory
 	if conf.LocalChartOverride.Directory != "" {
-		chart = conf.LocalChartOverride.Directory
+		localChart = conf.LocalChartOverride.Directory
+	}
+
+	var remoteChart = base.RemoteChart.Chart
+	if conf.RemoteChartOverride.Chart != "" {
+		remoteChart = conf.RemoteChartOverride.Chart
+	}
+
+	var remoteChartVersion = base.RemoteChart.Version
+	if conf.RemoteChartOverride.Version != "" {
+		remoteChartVersion = conf.RemoteChartOverride.Version
+	}
+
+	if remoteChart != "" && remoteChartVersion != "" {
+		remoteChart = fmt.Sprintf("%s --version %s", remoteChart, remoteChartVersion)
 	}
 
 	if artifactUrl != "" {
 		helmChart = GetRemoteArtifact(artifactUrl, artifactModificationCommand)
-	} else if chart != "" {
-		helmChart = chart
+	} else if localChart != "" {
+		helmChart = localChart
+	} else if remoteChart != "" {
+		helmChart = remoteChart
 	}
 
 	var outputFilename = conf.OutputFile

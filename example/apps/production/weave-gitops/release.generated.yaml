@@ -1,0 +1,330 @@
+---
+# Source: weave-gitops/templates/network-policy.yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dashboard-ingress
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: weave-gitops
+      app.kubernetes.io/instance: ww-gitops
+  ingress:
+  - ports:
+    - port: 9001
+      protocol: TCP
+  policyTypes:
+  - Ingress
+---
+# Source: weave-gitops/templates/network-policy.yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dashboard-egress
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: weave-gitops
+      app.kubernetes.io/instance: ww-gitops
+  egress:
+    - {}
+  policyTypes:
+  - Egress
+---
+# Source: weave-gitops/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ww-gitops-weave-gitops
+  labels:
+    helm.sh/chart: weave-gitops-4.0.32
+    app.kubernetes.io/name: weave-gitops
+    app.kubernetes.io/instance: ww-gitops
+    app.kubernetes.io/version: "v0.34.0"
+    app.kubernetes.io/managed-by: Helm
+---
+# Source: weave-gitops/templates/admin-user-creds.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cluster-user-auth
+  namespace: weave-gitops
+type: Opaque
+data:
+  username: "YWRtaW4="
+  password: "c29tZXRoaW5n"
+---
+# Source: weave-gitops/templates/admin-user-roles.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: wego-admin-cluster-role
+rules:
+  - apiGroups: ["*"]
+    resources: ["*"]
+    verbs: [ "get", "list", "watch" ]
+
+  - apiGroups: ["source.toolkit.fluxcd.io"]
+    resources: [ "buckets", "helmcharts", "gitrepositories", "helmrepositories", "ocirepositories" ]
+    verbs: [ "get", "list", "watch", "patch" ]
+
+  - apiGroups: ["kustomize.toolkit.fluxcd.io"]
+    resources: [ "kustomizations" ]
+    verbs: [ "get", "list", "watch", "patch" ]
+
+  - apiGroups: ["helm.toolkit.fluxcd.io"]
+    resources: [ "helmreleases" ]
+    verbs: [ "get", "list", "watch", "patch" ]
+
+  - apiGroups: [ "notification.toolkit.fluxcd.io" ]
+    resources: [ "providers", "alerts" ]
+    verbs: [ "get", "list", "watch" ]
+
+  - apiGroups: ["infra.contrib.fluxcd.io"]
+    resources: ["terraforms"]
+    verbs: [ "get", "list", "watch", "patch" ]
+
+  - apiGroups: ["apiextensions.k8s.io"]
+    resources: ["customresourcedefinitions"]
+    verbs: ["list", "watch"]
+
+  - apiGroups: [ "notification.toolkit.fluxcd.io" ]
+    resources: [ "providers", "alerts" ]
+    verbs: [ "get", "list", "watch", "patch" ]
+  
+  - apiGroups: ["image.toolkit.fluxcd.io"]
+    resources: [ "imagepolicies", "imagerepositories", "imageupdateautomations" ]
+    verbs: [ "get", "list", "watch", "patch" ]
+---
+# Source: weave-gitops/templates/role.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name:  ww-gitops-weave-gitops
+rules:
+  # impersonation rules for ui calls
+  - apiGroups: [""]
+    resources: ["users","groups"]
+    verbs: [ "impersonate" ]
+  # Access to enterprise entitlement
+  - apiGroups: [""]
+    resources: [ "secrets" ]
+    verbs: [ "get", "list" ]
+    # or should return the first non-falsy result
+    resourceNames: ["cluster-user-auth","oidc-auth"]
+
+  # The service account needs to read namespaces to know where it can query
+  - apiGroups: [ "" ]
+    resources: [ "namespaces" ]
+    verbs: [ "get", "list", "watch" ]
+
+  # The service account needs to list custom resources to query if given feature
+  # is available or not.
+  - apiGroups: [ "apiextensions.k8s.io" ]
+    resources: [ "customresourcedefinitions" ]
+    verbs: [ "list" ]
+---
+# Source: weave-gitops/templates/admin-user.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: admin-user-read-resources-cr
+subjects:
+- kind: User
+  name: admin
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: wego-admin-cluster-role
+  apiGroup: rbac.authorization.k8s.io
+---
+# Source: weave-gitops/templates/rolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name:  ww-gitops-weave-gitops
+  labels:
+    helm.sh/chart: weave-gitops-4.0.32
+    app.kubernetes.io/name: weave-gitops
+    app.kubernetes.io/instance: ww-gitops
+    app.kubernetes.io/version: "v0.34.0"
+    app.kubernetes.io/managed-by: Helm
+subjects:
+  - kind: ServiceAccount
+    name: ww-gitops-weave-gitops
+    namespace: weave-gitops
+roleRef:
+  kind: ClusterRole
+  name: ww-gitops-weave-gitops
+  apiGroup: rbac.authorization.k8s.io
+---
+# Source: weave-gitops/templates/admin-user-roles.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: wego-admin-role
+  namespace: weave-gitops
+rules:
+  - apiGroups: ["*"]
+    resources: ["*"]
+    verbs: [ "get", "list", "watch" ]
+
+  - apiGroups: ["source.toolkit.fluxcd.io"]
+    resources: [ "buckets", "helmcharts", "gitrepositories", "helmrepositories", "ocirepositories" ]
+    verbs: [ "get", "list", "watch", "patch" ]
+
+  - apiGroups: ["kustomize.toolkit.fluxcd.io"]
+    resources: [ "kustomizations" ]
+    verbs: [ "get", "list", "watch", "patch" ]
+
+  - apiGroups: ["helm.toolkit.fluxcd.io"]
+    resources: [ "helmreleases" ]
+    verbs: [ "get", "list", "watch", "patch" ]
+
+  - apiGroups: [ "notification.toolkit.fluxcd.io" ]
+    resources: [ "providers", "alerts" ]
+    verbs: [ "get", "list", "watch", "patch" ]
+
+  - apiGroups: ["infra.contrib.fluxcd.io"]
+    resources: ["terraforms"]
+    verbs: [ "get", "list", "watch", "patch" ]
+---
+# Source: weave-gitops/templates/admin-user.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: admin-user-read-resources
+  namespace: weave-gitops
+subjects:
+  - kind: User
+    name: wego-admin
+    namespace: weave-gitops
+roleRef:
+  kind: Role
+  name: wego-admin-role
+  apiGroup: rbac.authorization.k8s.io
+---
+# Source: weave-gitops/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: ww-gitops-weave-gitops
+  labels:
+    helm.sh/chart: weave-gitops-4.0.32
+    app.kubernetes.io/name: weave-gitops
+    app.kubernetes.io/instance: ww-gitops
+    app.kubernetes.io/version: "v0.34.0"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9001
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: weave-gitops
+    app.kubernetes.io/instance: ww-gitops
+---
+# Source: weave-gitops/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ww-gitops-weave-gitops
+  labels:
+    helm.sh/chart: weave-gitops-4.0.32
+    app.kubernetes.io/name: weave-gitops
+    app.kubernetes.io/instance: ww-gitops
+    app.kubernetes.io/version: "v0.34.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: weave-gitops
+    weave.works/app: weave-gitops-oss
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: weave-gitops
+      app.kubernetes.io/instance: ww-gitops
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: weave-gitops
+        app.kubernetes.io/instance: ww-gitops
+        app.kubernetes.io/part-of: weave-gitops
+        weave.works/app: weave-gitops-oss
+    spec:
+      serviceAccountName: ww-gitops-weave-gitops
+      containers:
+        - name: weave-gitops
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          image: "ghcr.io/weaveworks/wego-app:v0.34.0"
+          imagePullPolicy: IfNotPresent
+          args:
+            - "--log-level"
+            - "info"
+            - "--insecure"
+          ports:
+            - name: http
+              containerPort: 9001
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          env:
+            - name: WEAVE_GITOPS_FEATURE_TENANCY
+              value: "true"
+            - name: WEAVE_GITOPS_FEATURE_CLUSTER
+              value: "false"
+          resources:
+            {}
+---
+# Source: weave-gitops/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ww-gitops-weave-gitops
+  labels:
+    helm.sh/chart: weave-gitops-4.0.32
+    app.kubernetes.io/name: weave-gitops
+    app.kubernetes.io/instance: ww-gitops
+    app.kubernetes.io/version: "v0.34.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  ingressClassName: alb
+  rules:
+---
+# Source: weave-gitops/templates/tests/test-connection.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "ww-gitops-weave-gitops-test-connection"
+  labels:
+    helm.sh/chart: weave-gitops-4.0.32
+    app.kubernetes.io/name: weave-gitops
+    app.kubernetes.io/instance: ww-gitops
+    app.kubernetes.io/version: "v0.34.0"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['ww-gitops-weave-gitops:9001']
+  restartPolicy: Never

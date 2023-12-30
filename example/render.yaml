@@ -20,3 +20,15 @@ some-package:
     - workingDirectory: apps/production/some-package
       releaseName: some-package
       namespace: some-package
+ww-gitops:
+  base:
+    remoteChart:
+      chart: oci://ghcr.io/weaveworks/charts/weave-gitops
+      version: 4.0.32
+  renders:
+    - workingDirectory: apps/staging/weave-gitops
+      releaseName: ww-gitops
+      namespace: weave-gitops
+    - workingDirectory: apps/production/weave-gitops
+      releaseName: ww-gitops
+      namespace: weave-gitops

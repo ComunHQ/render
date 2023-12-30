@@ -1,6 +1,7 @@
 cert-manager:
   base:
-    artifactUrl: "https://charts.jetstack.io/charts/cert-manager-v1.11.0.tgz"
+    remoteArtifact:
+      url: "https://charts.jetstack.io/charts/cert-manager-v1.11.0.tgz"
   renders:
     - workingDirectory: apps/staging/cert-manager
       releaseName: cert-manager

@@ -1,4 +1,5 @@
 cert-manager:
+  type: remoteArtifact
   base:
     remoteArtifact:
       url: "https://charts.jetstack.io/charts/cert-manager-v1.11.0.tgz"
@@ -10,6 +11,7 @@ cert-manager:
       releaseName: cert-manager
       namespace: cert-manager
 some-package:
+  type: localChart
   base:
     localChart: 
       directory: helm/some-package
@@ -21,6 +23,7 @@ some-package:
       releaseName: some-package
       namespace: some-package
 ww-gitops:
+  type: remoteChart
   base:
     remoteChart:
       chart: oci://ghcr.io/weaveworks/charts/weave-gitops

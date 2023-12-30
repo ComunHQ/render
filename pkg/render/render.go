@@ -16,6 +16,7 @@ import (
 )
 
 type renderConf struct {
+	Type    string     `yaml:"type"`
 	Base    renderBase `yaml:"base"`
 	Renders []render   `yaml:"renders"`
 }
@@ -101,44 +102,67 @@ func ValuesFile(workingDirectory string) string {
 	return valuesFile
 }
 
-func Render(conf render, base renderBase) {
-	var helmChart string
+type helmChartAndVersion struct {
+	Chart   string
+	Version string
+}
 
-	var artifactUrl = base.RemoteArtifact.Url
-	if conf.RemoteArtifactOverride.Url != "" {
-		artifactUrl = conf.RemoteArtifactOverride.Url
+func GetChartAndVersionForRemoteArtifact(artifact remoteArtifact) *helmChartAndVersion {
+	result := helmChartAndVersion{}
+	result.Chart = GetRemoteArtifact(artifact.Url, artifact.ModificationCommand)
+	return &result
+}
+
+func GetChartAndVersionForLocalChart(chart localChart) *helmChartAndVersion {
+	result := helmChartAndVersion{}
+	result.Chart = chart.Directory
+	return &result
+}
+
+func GetChartAndVersionForRemoteChart(chart remoteChart) *helmChartAndVersion {
+	result := helmChartAndVersion{}
+	result.Chart = chart.Chart
+	if chart.Version != "" {
+		result.Version = chart.Version
 	}
+	return &result
+}
 
-	var artifactModificationCommand = base.RemoteArtifact.ModificationCommand
-	if conf.RemoteArtifactOverride.ModificationCommand != "" {
-		artifactModificationCommand = conf.RemoteArtifactOverride.ModificationCommand
+func GetChartAndVersion(renderType string, conf render, base renderBase) *helmChartAndVersion {
+	if renderType == "remoteArtifact" {
+		artifact := base.RemoteArtifact
+		if conf.RemoteArtifactOverride.Url != "" {
+			artifact.Url = conf.RemoteArtifactOverride.Url
+		}
+		if conf.RemoteArtifactOverride.ModificationCommand != "" {
+			artifact.ModificationCommand = conf.RemoteArtifactOverride.ModificationCommand
+		}
+		return GetChartAndVersionForRemoteArtifact(artifact)
+	} else if renderType == "localChart" {
+		chart := base.LocalChart
+		if conf.LocalChartOverride.Directory != "" {
+			chart.Directory = conf.LocalChartOverride.Directory
+		}
+		return GetChartAndVersionForLocalChart(chart)
+	} else if renderType == "remoteChart" {
+		chart := base.RemoteChart
+		if conf.RemoteChartOverride.Chart != "" {
+			chart.Chart = conf.RemoteChartOverride.Chart
+		}
+		if conf.RemoteChartOverride.Version != "" {
+			chart.Version = conf.RemoteChartOverride.Version
+		}
+		return GetChartAndVersionForRemoteChart(chart)
+	} else {
+		panic(fmt.Sprintf("renderType `%s` not recognized", renderType))
 	}
+}
 
-	var localChart = base.LocalChart.Directory
-	if conf.LocalChartOverride.Directory != "" {
-		localChart = conf.LocalChartOverride.Directory
-	}
-
-	var remoteChart = base.RemoteChart.Chart
-	if conf.RemoteChartOverride.Chart != "" {
-		remoteChart = conf.RemoteChartOverride.Chart
-	}
-
-	var remoteChartVersion = base.RemoteChart.Version
-	if conf.RemoteChartOverride.Version != "" {
-		remoteChartVersion = conf.RemoteChartOverride.Version
-	}
-
-	if remoteChart != "" && remoteChartVersion != "" {
-		remoteChart = fmt.Sprintf("%s --version %s", remoteChart, remoteChartVersion)
-	}
-
-	if artifactUrl != "" {
-		helmChart = GetRemoteArtifact(artifactUrl, artifactModificationCommand)
-	} else if localChart != "" {
-		helmChart = localChart
-	} else if remoteChart != "" {
-		helmChart = remoteChart
+func Render(renderType string, conf render, base renderBase) {
+	chartAndVersion := GetChartAndVersion(renderType, conf, base)
+	helmChart := chartAndVersion.Chart
+	if chartAndVersion.Version != "" {
+		helmChart += " --version " + chartAndVersion.Version
 	}
 
 	var outputFilename = conf.OutputFile
@@ -168,7 +192,7 @@ func Render(conf render, base renderBase) {
 
 func Run(conf renderConf) {
 	for _, render := range conf.Renders {
-		Render(render, conf.Base)
+		Render(conf.Type, render, conf.Base)
 	}
 }
 

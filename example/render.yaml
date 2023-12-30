@@ -11,7 +11,8 @@ cert-manager:
       namespace: cert-manager
 some-package:
   base:
-    chart: helm/some-package
+    localChart: 
+      directory: helm/some-package
   renders:
     - workingDirectory: apps/staging/some-package
       releaseName: some-package

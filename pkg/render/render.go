@@ -22,14 +22,14 @@ type renderConf struct {
 
 type renderBase struct {
 	RemoteArtifact remoteArtifact `yaml:"remoteArtifact"`
-	Chart          string         `yaml:"chart"`
+	LocalChart     localChart     `yaml:"localChart"`
 	IncludeCrds    bool           `yaml:"includeCrds"`
 }
 
 type render struct {
 	WorkingDirectory       string         `yaml:"workingDirectory"`
 	RemoteArtifactOverride remoteArtifact `yaml:"remoteArtifact"`
-	ChartOverride          string         `yaml:"chart"`
+	LocalChartOverride     localChart     `yaml:"localChart"`
 	OutputFile             string         `yaml:"outputFile"`
 	ReleaseName            string         `yaml:"releaseName"`
 	Namespace              string         `yaml:"namespace"`
@@ -38,6 +38,10 @@ type render struct {
 type remoteArtifact struct {
 	Url                 string `yaml:"url"`
 	ModificationCommand string `yaml:"modificationCommand"`
+}
+
+type localChart struct {
+	Directory string `yaml:"directory"`
 }
 
 func GetRemoteArtifact(artifactUrl string, artifactModificationCommand string) string {
@@ -103,9 +107,9 @@ func Render(conf render, base renderBase) {
 		artifactModificationCommand = conf.RemoteArtifactOverride.ModificationCommand
 	}
 
-	var chart = base.Chart
-	if conf.ChartOverride != "" {
-		chart = conf.ChartOverride
+	var chart = base.LocalChart.Directory
+	if conf.LocalChartOverride.Directory != "" {
+		chart = conf.LocalChartOverride.Directory
 	}
 
 	if artifactUrl != "" {

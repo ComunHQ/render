@@ -21,20 +21,23 @@ type renderConf struct {
 }
 
 type renderBase struct {
-	ArtifactUrl                 string `yaml:"artifactUrl"`
-	ArtifactModificationCommand string `yaml:"artifactModificationCommand"`
-	Chart                       string `yaml:"chart"`
-	IncludeCrds                 bool   `yaml:"includeCrds"`
+	RemoteArtifact remoteArtifact `yaml:"remoteArtifact"`
+	Chart          string         `yaml:"chart"`
+	IncludeCrds    bool           `yaml:"includeCrds"`
 }
 
 type render struct {
-	WorkingDirectory                    string `yaml:"workingDirectory"`
-	ArtifactUrlOverride                 string `yaml:"artifactUrl"`
-	ArtifactModificationCommandOverride string `yaml:"artifactModificationCommand"`
-	ChartOverride                       string `yaml:"chart"`
-	OutputFile                          string `yaml:"outputFile"`
-	ReleaseName                         string `yaml:"releaseName"`
-	Namespace                           string `yaml:"namespace"`
+	WorkingDirectory       string         `yaml:"workingDirectory"`
+	RemoteArtifactOverride remoteArtifact `yaml:"remoteArtifact"`
+	ChartOverride          string         `yaml:"chart"`
+	OutputFile             string         `yaml:"outputFile"`
+	ReleaseName            string         `yaml:"releaseName"`
+	Namespace              string         `yaml:"namespace"`
+}
+
+type remoteArtifact struct {
+	Url                 string `yaml:"url"`
+	ModificationCommand string `yaml:"modificationCommand"`
 }
 
 func GetRemoteArtifact(artifactUrl string, artifactModificationCommand string) string {
@@ -90,14 +93,14 @@ func ValuesFile(workingDirectory string) string {
 func Render(conf render, base renderBase) {
 	var helmChart string
 
-	var artifactUrl = base.ArtifactUrl
-	if conf.ArtifactUrlOverride != "" {
-		artifactUrl = conf.ArtifactUrlOverride
+	var artifactUrl = base.RemoteArtifact.Url
+	if conf.RemoteArtifactOverride.Url != "" {
+		artifactUrl = conf.RemoteArtifactOverride.Url
 	}
 
-	var artifactModificationCommand = base.ArtifactModificationCommand
-	if conf.ArtifactModificationCommandOverride != "" {
-		artifactModificationCommand = conf.ArtifactModificationCommandOverride
+	var artifactModificationCommand = base.RemoteArtifact.ModificationCommand
+	if conf.RemoteArtifactOverride.ModificationCommand != "" {
+		artifactModificationCommand = conf.RemoteArtifactOverride.ModificationCommand
 	}
 
 	var chart = base.Chart

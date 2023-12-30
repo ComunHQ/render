@@ -9,3 +9,13 @@ cert-manager:
     - workingDirectory: apps/production/cert-manager
       releaseName: cert-manager
       namespace: cert-manager
+some-package:
+  base:
+    chart: helm/some-package
+  renders:
+    - workingDirectory: apps/staging/some-package
+      releaseName: some-package
+      namespace: some-package
+    - workingDirectory: apps/production/some-package
+      releaseName: some-package
+      namespace: some-package

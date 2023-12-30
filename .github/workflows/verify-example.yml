@@ -20,8 +20,8 @@ jobs:
       - name: Render Example
         run: |
           cd example
-          find . -name "*.generated.yaml" -type f -delete
-          ./scripts/render.sh render.yaml
+          ./scripts/render.sh
+          cd ..
 
       - name: Verify Example
         run: git diff --exit-code 

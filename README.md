@@ -34,3 +34,18 @@ One `.generated.yaml` is generated per render in the `render.yaml`.
 ### Example
 
 You can see a full example of a use case of the the `Render` tool in the [example](https://github.com/ComunHQ/render/tree/main/example) folder.
+
+### Usage
+
+You can run the render CLI by invoking
+```
+render path/to/render.yaml
+```
+Optionally, you may provide a `-s` flag to select one specific entry in the `render.yaml` to render. This would look like
+```
+render render.yaml -s some-package
+```
+
+### Caveat
+
+Currently, you must have the `helm` executable installed in your path in order to use `Render`. Fixing this is currently an open issue.

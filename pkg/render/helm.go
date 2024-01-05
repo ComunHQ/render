@@ -148,5 +148,8 @@ func HelmTemplate(
 	}
 
 	outputFile := path.Join(workingDirectory, outputFilename+".generated.yaml")
-	os.WriteFile(outputFile, render, 0644)
+	err = os.WriteFile(outputFile, render, 0644)
+	if err != nil {
+		panic(err)
+	}
 }

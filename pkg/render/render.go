@@ -33,6 +33,11 @@ func Render(renderType string, conf render, base renderBase) {
 		outputFilename = "release"
 	}
 
+	var kubeVersion = base.KubeVersion
+	if conf.KubeVersionOverride != "" {
+		kubeVersion = conf.KubeVersionOverride
+	}
+
 	valuesYaml := ValuesYaml(conf.WorkingDirectory)
 
 	HelmTemplate(
@@ -43,6 +48,7 @@ func Render(renderType string, conf render, base renderBase) {
 		conf.Namespace,
 		conf.ReleaseName,
 		base.IncludeCrds,
+		kubeVersion,
 	)
 }
 

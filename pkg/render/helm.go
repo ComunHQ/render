@@ -107,6 +107,7 @@ func HelmTemplate(
 	namespace string,
 	releaseName string,
 	includeCrds bool,
+	kubeVersion string,
 ) {
 	client, err := helmclient.New(&helmclient.Options{})
 	if err != nil {
@@ -119,14 +120,13 @@ func HelmTemplate(
 		ValuesYaml: valuesYaml,
 	}
 
-	// TODO: encode KubeVersion in render.yaml specification
-	kubeVersion, err := chartutil.ParseKubeVersion("v1.26.11")
+	chartKubeVersion, err := chartutil.ParseKubeVersion(kubeVersion)
 	if err != nil {
 		panic(err)
 	}
 
 	options := helmclient.HelmTemplateOptions{
-		KubeVersion: kubeVersion,
+		KubeVersion: chartKubeVersion,
 	}
 
 	if namespace != "" {

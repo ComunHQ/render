@@ -4,6 +4,7 @@ albc:
     remoteArtifact:
       url: "https://aws.github.io/eks-charts/aws-load-balancer-controller-1.6.1.tgz"
     includeCrds: true
+    kubeVersion: "v1.26.11"
   renders:
     - workingDirectory: apps/staging/albc
       releaseName: albc
@@ -16,6 +17,7 @@ cert-manager:
   base:
     remoteArtifact:
       url: "https://charts.jetstack.io/charts/cert-manager-v1.11.0.tgz"
+    kubeVersion: "v1.26.11"
   renders:
     - workingDirectory: apps/staging/cert-manager
       releaseName: cert-manager
@@ -28,6 +30,7 @@ some-package:
   base:
     localChart: 
       directory: helm/some-package
+    kubeVersion: "v1.26.11"
   renders:
     - workingDirectory: apps/staging/some-package
       releaseName: some-package
@@ -41,6 +44,7 @@ ww-gitops:
     remoteChart:
       chart: oci://ghcr.io/weaveworks/charts/weave-gitops
       version: 4.0.32
+    kubeVersion: "v1.26.11"
   renders:
     - workingDirectory: apps/staging/weave-gitops
       releaseName: ww-gitops

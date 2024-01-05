@@ -7,6 +7,7 @@ We built render at [Comun](https://github.com/ComunHQ) because:
 2. We have found helm deployments to be operationally complex, but still want to take advantage of helm's packaging and templating capabilities.
 3. Disaster recovery is important to us and render allows us to store raw kubernetes yaml specifications in our fluxcd state repository instead of pointing to remote charts stored in remote helm or ocr repositories.
 4. We use [kustomize](https://github.com/kubernetes-sigs/kustomize) to package together our kubernetes apps that will be deployed by fluxcd. Render works seamlessly with kustomize by generating the full yaml for a helm chart and writing it to a file that can be included in a kustomization.
+5. The values that we plug in to our helm charts are very similar across our clusters. Therefore, we would like to be able share code in our values specifications. Render solves this by building on top of the [Jsonnet](https://jsonnet.org/) programming language. 
 
 ## How to use Render
 
@@ -46,7 +47,3 @@ Optionally, you may provide a `-s` flag to select one specific entry in the `ren
 ```
 render render.yaml -s some-package
 ```
-
-### Caveat
-
-Currently, you must have the `helm` executable installed in your path in order to use `Render`. Fixing this is currently an open issue.

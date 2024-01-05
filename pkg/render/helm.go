@@ -3,7 +3,6 @@ package render
 import (
 	"context"
 	"fmt"
-	"log/slog"
 	"net/http"
 	"os"
 	"path"
@@ -11,6 +10,8 @@ import (
 
 	"github.com/bitfield/script"
 	"github.com/codeclysm/extract/v3"
+	helmclient "github.com/mittwald/go-helm-client"
+	"helm.sh/helm/v3/pkg/chartutil"
 )
 
 type helmChartAndVersion struct {
@@ -102,30 +103,50 @@ func HelmTemplate(
 	workingDirectory string,
 	chartAndVersion helmChartAndVersion,
 	outputFilename string,
-	valuesFile string,
+	valuesYaml string,
 	namespace string,
 	releaseName string,
 	includeCrds bool,
 ) {
-	helmChart := chartAndVersion.Chart
-	if chartAndVersion.Version != "" {
-		helmChart += " --version " + chartAndVersion.Version
+	client, err := helmclient.New(&helmclient.Options{})
+	if err != nil {
+		panic(err)
 	}
 
-	var command = fmt.Sprintf("helm template %s", helmChart)
-	command = command + fmt.Sprintf(" --values %s", valuesFile)
+	spec := helmclient.ChartSpec{
+		ChartName:  chartAndVersion.Chart,
+		Version:    chartAndVersion.Version,
+		ValuesYaml: valuesYaml,
+	}
+
+	// TODO: encode KubeVersion in render.yaml specification
+	kubeVersion, err := chartutil.ParseKubeVersion("v1.26.0")
+	if err != nil {
+		panic(err)
+	}
+
+	options := helmclient.HelmTemplateOptions{
+		KubeVersion: kubeVersion,
+	}
+
 	if namespace != "" {
-		command = command + fmt.Sprintf(" --namespace %s", namespace)
+		spec.Namespace = namespace
 	}
-	if releaseName != "" {
-		command = command + fmt.Sprintf(" --name-template %s", releaseName)
-	}
-	if includeCrds {
-		command = command + " --include-crds"
-	}
-	slog.Debug("Running command: " + command)
-	var pipe = script.Exec(command).WithStderr(os.Stderr)
 
-	var outputFile = path.Join(workingDirectory, outputFilename+".generated.yaml")
-	pipe.WriteFile(outputFile)
+	if releaseName != "" {
+		spec.NameTemplate = releaseName
+	}
+
+	if includeCrds {
+		spec.UpgradeCRDs = true
+		spec.SkipCRDs = false
+	}
+
+	render, err := client.TemplateChart(&spec, &options)
+	if err != nil {
+		panic(err)
+	}
+
+	outputFile := path.Join(workingDirectory, outputFilename+".generated.yaml")
+	os.WriteFile(outputFile, render, 0644)
 }

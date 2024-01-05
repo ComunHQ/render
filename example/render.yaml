@@ -1,3 +1,16 @@
+albc:
+  type: remoteArtifact
+  base:
+    remoteArtifact:
+      url: "https://aws.github.io/eks-charts/aws-load-balancer-controller-1.6.1.tgz"
+    includeCrds: true
+  renders:
+    - workingDirectory: apps/staging/albc
+      releaseName: albc
+      namespace: albc
+    - workingDirectory: apps/production/albc
+      releaseName: albc
+      namespace: albc
 cert-manager:
   type: remoteArtifact
   base:

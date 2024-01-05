@@ -11,6 +11,7 @@ type renderBase struct {
 	LocalChart     localChart     `yaml:"localChart"`
 	RemoteChart    remoteChart    `yaml:"remoteChart"`
 	IncludeCrds    bool           `yaml:"includeCrds"`
+	KubeVersion    string         `yaml:"kubeVersion"`
 }
 
 type render struct {
@@ -21,6 +22,7 @@ type render struct {
 	OutputFile             string         `yaml:"outputFile"`
 	ReleaseName            string         `yaml:"releaseName"`
 	Namespace              string         `yaml:"namespace"`
+	KubeVersionOverride    string         `yaml:"kubeVersion"`
 }
 
 type remoteArtifact struct {

@@ -106,6 +106,7 @@ func HelmTemplate(
 	namespace string,
 	releaseName string,
 	includeCrds bool,
+	kubeVersion string,
 ) {
 	helmChart := chartAndVersion.Chart
 	if chartAndVersion.Version != "" {
@@ -122,6 +123,9 @@ func HelmTemplate(
 	}
 	if includeCrds {
 		command = command + " --include-crds"
+	}
+	if kubeVersion != "" {
+		command = command + fmt.Sprintf(" --kube-version %s", kubeVersion)
 	}
 	slog.Debug("Running command: " + command)
 	var pipe = script.Exec(command).WithStderr(os.Stderr)

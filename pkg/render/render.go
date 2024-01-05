@@ -6,14 +6,10 @@ import (
 
 	"github.com/google/go-jsonnet"
 	"gopkg.in/yaml.v3"
+	sigsyaml "sigs.k8s.io/yaml"
 )
 
-func ValuesFile(workingDirectory string) string {
-	var dir, err = os.MkdirTemp("", "")
-	if err != nil {
-		panic(err)
-	}
-
+func ValuesYaml(workingDirectory string) string {
 	jsonnetFile := fmt.Sprintf("%s/values.jsonnet", workingDirectory)
 	vm := jsonnet.MakeVM()
 	jsonValues, err := vm.EvaluateFile(jsonnetFile)
@@ -21,12 +17,12 @@ func ValuesFile(workingDirectory string) string {
 		panic(err)
 	}
 
-	valuesFile := fmt.Sprintf("%s/values.json", dir)
-	err = os.WriteFile(valuesFile, []byte(jsonValues), 0644)
+	yaml, err := sigsyaml.JSONToYAML([]byte(jsonValues))
 	if err != nil {
 		panic(err)
 	}
-	return valuesFile
+
+	return string(yaml)
 }
 
 func Render(renderType string, conf render, base renderBase) {
@@ -42,13 +38,13 @@ func Render(renderType string, conf render, base renderBase) {
 		kubeVersion = conf.KubeVersionOverride
 	}
 
-	valuesFile := ValuesFile(conf.WorkingDirectory)
+	valuesYaml := ValuesYaml(conf.WorkingDirectory)
 
 	HelmTemplate(
 		conf.WorkingDirectory,
 		*chartAndVersion,
 		outputFilename,
-		valuesFile,
+		valuesYaml,
 		conf.Namespace,
 		conf.ReleaseName,
 		base.IncludeCrds,

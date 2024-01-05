@@ -120,7 +120,7 @@ func HelmTemplate(
 	}
 
 	// TODO: encode KubeVersion in render.yaml specification
-	kubeVersion, err := chartutil.ParseKubeVersion("v1.26.0")
+	kubeVersion, err := chartutil.ParseKubeVersion("v1.26.11")
 	if err != nil {
 		panic(err)
 	}

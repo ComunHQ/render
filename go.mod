@@ -6,7 +6,7 @@ toolchain go1.22.5
 
 require (
 	github.com/bitfield/script v0.22.1
-	github.com/codeclysm/extract/v3 v3.1.1
+	github.com/codeclysm/extract/v4 v4.0.0
 	github.com/google/go-jsonnet v0.20.0
 	github.com/mittwald/go-helm-client v0.12.11
 	github.com/spf13/cobra v1.8.1

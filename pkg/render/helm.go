@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/bitfield/script"
-	"github.com/codeclysm/extract/v3"
+	"github.com/codeclysm/extract/v4"
 	helmclient "github.com/mittwald/go-helm-client"
 	"helm.sh/helm/v3/pkg/chartutil"
 )
